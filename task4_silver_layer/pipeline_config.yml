@@ -1,0 +1,19 @@
+dev:
+  catalog: dbr_dev_ua5816bd
+  bronze_schema: natalkamartinuk55_bronze
+  silver_schema: natalkamartinuk55_silver
+  bronze_volumes_path: "/Volumes/dbr_dev_ua5816bd/natalkamartinuk55/raw_data/"
+  youtube_pipeline:
+    source_table: youtube_videos_bronze
+    target_table: youtube_videos_silver
+    business_key: video_id
+
+prod:
+  catalog: dbr_prod_ua5816bd
+  bronze_schema: natalkamartinuk55_bronze
+  silver_schema: natalkamartinuk55_silver
+  bronze_volumes_path: "/Volumes/dbr_prod_ua5816bd/natalkamartinuk55/raw_data/"
+  youtube_pipeline:
+    source_table: youtube_videos_bronze
+    target_table: youtube_videos_silver
+    business_key: video_id
