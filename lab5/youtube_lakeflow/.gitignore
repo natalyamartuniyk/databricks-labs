@@ -6,5 +6,3 @@ __pycache__/
 .venv/
 scratch/**
 !scratch/README.md
-**/explorations/**
-**/!explorations/README.md
