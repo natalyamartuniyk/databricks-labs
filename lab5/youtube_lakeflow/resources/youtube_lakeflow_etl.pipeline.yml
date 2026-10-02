@@ -1,0 +1,31 @@
+# The main pipeline for youtube_lakeflow
+
+resources:
+  pipelines:
+    youtube_lakeflow_etl:
+      name: youtube_lakeflow_etl
+      catalog: ${var.catalog}
+      schema: ${var.bronze_schema}
+      serverless: true
+      root_path: "../src/youtube_lakeflow_etl"
+
+      configuration:
+        youtube.catalog: ${var.catalog}
+        youtube.bronze_schema: ${var.bronze_schema}
+        youtube.silver_schema: ${var.silver_schema}
+        youtube.gold_schema: ${var.gold_schema}
+        youtube.raw_volume_path: ${var.raw_volume_path}
+        eventhub.namespace: evhua5816bd
+        eventhub.name: natalkamartinuk55-stream-hub
+        eventhub.secret_scope: natalkamartinuk55_scope
+        eventhub.secret_key: natalkamartinuk55-eventhub-conn
+
+      libraries:
+        - glob:
+            include: ../src/youtube_lakeflow_etl/transformations/**
+
+      environment:
+        dependencies:
+          # We include every dependency defined by pyproject.toml by defining an editable environment
+          # that points to the folder where pyproject.toml is deployed.
+          - --editable ${workspace.file_path}
