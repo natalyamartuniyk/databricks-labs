@@ -1,5 +1,5 @@
 from pyspark import pipelines as dp
-from pyspark.sql.functions import col, struct
+from pyspark.sql.functions import col, struct, to_date
 
 CATALOG = spark.conf.get("youtube.catalog")
 SILVER_SCHEMA = spark.conf.get("youtube.silver_schema")
@@ -13,9 +13,9 @@ dp.create_streaming_table(
 
 dp.create_auto_cdc_flow(
     target=SCD2_TABLE,
-    source="youtube_videos_silver",
+    source=f"{CATALOG}.{SILVER_SCHEMA}.youtube_videos_ldp_silver",
     keys=["video_id"],
-    sequence_by=struct(col("trending_date"), col("_silver_processed_at")),
+    sequence_by=struct(to_date(col("trending_date"), "yy.dd.MM"), col("_silver_processed_at")),
     stored_as_scd_type=2,
     track_history_column_list=["views", "likes", "dislikes", "comment_count"],
 )

@@ -6,7 +6,7 @@ SILVER_SCHEMA = spark.conf.get("youtube.silver_schema")
 
 VIDEO_QUALITY_RULES = {
     "valid_views": "views >= 0",
-    "valid_likes": "views >= 0",
+    "valid_likes": "likes >= 0",
     "valid_dislikes": "dislikes >= 0",
     "valid_comment_count": "comment_count >= 0",
 }
@@ -45,6 +45,6 @@ def youtube_videos_silver():
 def youtube_videos_quarantine():
     return (
         _typed_videos_stream()
-        .filter(f"NOT ({ALL_RULES_SQL})")
+        .filter(f"NOT coalesce({ALL_RULES_SQL}, false)")
         .withColumn("_quarantined_at", current_timestamp())
     )

@@ -7,10 +7,10 @@ SCHEMA_LOCATION = f"{RAW_VOLUME_PATH}/_schemas/videos_files"
 @dp.table(
     name = "youtube_videos_files_bronze",
     comment = "Raw YouTube trending video data from the raw_data volume, ingested incrementally via Auto Loader",
-    table_properties = {
-        "pipelines.reset.allowed": "false",
-        "delta.appendOnly": "true",
-    }
+    table_properties={
+    "pipelines.reset.allowed": "false",
+    "delta.appendOnly": "true",
+},
 )
 def youtube_videos_files_bronze():
     return (
@@ -20,6 +20,7 @@ def youtube_videos_files_bronze():
         .option("cloudFiles.schemaLocation", SCHEMA_LOCATION)
         .option("cloudFiles.schemaEvolutionMode", "addNewColumns")
         .option("cloudFiles.inferColumnTypes", "false")
+        .option("pathGlobFilter", "*.csv")
         .option("header", "true")
         .option("multiLine", "true")
         .option("escape", "\"")
