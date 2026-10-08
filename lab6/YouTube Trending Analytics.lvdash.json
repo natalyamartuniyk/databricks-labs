@@ -74,10 +74,51 @@
       "name": "1bfabd29",
       "displayName": "top_channels",
       "queryLines": [
-        "SELECT *\n",
-        "FROM dbr_dev_ua5816bd.natalkamartinuk55_gold.agg_channel_summary\n",
+        "WITH per_video AS (\n",
+        "    SELECT f.channel_key, f.video_id, MAX(f.views) AS peak_views\n",
+        "    FROM dbr_dev_ua5816bd.natalkamartinuk55_gold.fact_video_daily_stats AS f\n",
+        "    JOIN dbr_dev_ua5816bd.natalkamartinuk55_gold.dim_date     AS d ON f.date_key    = d.date_key\n",
+        "    JOIN dbr_dev_ua5816bd.natalkamartinuk55_gold.dim_category AS c ON f.category_id = c.category_id\n",
+        "    WHERE d.full_date BETWEEN :period.min AND :period.max\n",
+        "            AND (:category IS NULL OR size(:category) <= 0 OR ARRAY_CONTAINS(:category, c.category_name))\n",
+        "    GROUP BY f.channel_key, f.video_id\n",
+        ")\n",
+        "SELECT ch.channel_title, SUM(p.peak_views) AS total_views\n",
+        "FROM per_video AS p\n",
+        "JOIN dbr_dev_ua5816bd.natalkamartinuk55_gold.dim_channel AS ch ON p.channel_key = ch.channel_key\n",
+        "GROUP BY ch.channel_title\n",
         "ORDER BY total_views DESC\n",
         "LIMIT 10"
+      ],
+      "parameters": [
+        {
+          "displayName": "period",
+          "keyword": "period",
+          "dataType": "DATE",
+          "complexType": "RANGE",
+          "defaultSelection": {
+            "range": {
+              "dataType": "DATE",
+              "min": {
+                "value": "2017-11-14T00:00:00.000"
+              },
+              "max": {
+                "value": "2018-06-14T23:59:59.999"
+              }
+            }
+          }
+        },
+        {
+          "displayName": "category",
+          "keyword": "category",
+          "dataType": "STRING",
+          "complexType": "MULTI",
+          "defaultSelection": {
+            "operator": {
+              "operator": "AND"
+            }
+          }
+        }
       ]
     },
     {
@@ -689,6 +730,19 @@
                   ],
                   "disaggregated": false
                 }
+              },
+              {
+                "name": "parameter_dashboards/01f1c1accc401905ad77915e3b2fdacb/datasets/01f1c1b323fd1087b70a6174b4d85858_period",
+                "query": {
+                  "datasetName": "1bfabd29",
+                  "parameters": [
+                    {
+                      "name": "period",
+                      "keyword": "period"
+                    }
+                  ],
+                  "disaggregated": false
+                }
               }
             ],
             "spec": {
@@ -727,6 +781,10 @@
                   {
                     "fieldName": "full_date",
                     "queryName": "dashboards/01f1c1accc401905ad77915e3b2fdacb/datasets/01f1c1b512691fab97ec40db9817c500_full_date"
+                  },
+                  {
+                    "parameterName": "period",
+                    "queryName": "parameter_dashboards/01f1c1accc401905ad77915e3b2fdacb/datasets/01f1c1b323fd1087b70a6174b4d85858_period"
                   }
                 ]
               }
@@ -793,6 +851,19 @@
                   ],
                   "disaggregated": false
                 }
+              },
+              {
+                "name": "parameter_dashboards/01f1c1accc401905ad77915e3b2fdacb/datasets/01f1c1b323fd1087b70a6174b4d85858_category",
+                "query": {
+                  "datasetName": "1bfabd29",
+                  "parameters": [
+                    {
+                      "name": "category",
+                      "keyword": "category"
+                    }
+                  ],
+                  "disaggregated": false
+                }
               }
             ],
             "spec": {
@@ -818,6 +889,10 @@
                   {
                     "fieldName": "category_name",
                     "queryName": "dashboards/01f1c1accc401905ad77915e3b2fdacb/datasets/01f1c1b512691fab97ec40db9817c500_category_name"
+                  },
+                  {
+                    "parameterName": "category",
+                    "queryName": "parameter_dashboards/01f1c1accc401905ad77915e3b2fdacb/datasets/01f1c1b323fd1087b70a6174b4d85858_category"
                   }
                 ]
               }
