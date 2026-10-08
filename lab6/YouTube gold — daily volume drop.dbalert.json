@@ -1,0 +1,41 @@
+{
+  "evaluation": {
+    "source": {
+      "name": "volume_pct",
+      "display": "volume_pct",
+      "aggregation": "AGGREGATION_UNSPECIFIED"
+    },
+    "comparison_operator": "LESS_THAN",
+    "threshold": {
+      "value": {
+        "double_value": 50.0
+      }
+    },
+    "notification": {}
+  },
+  "schedule": {
+    "quartz_cron_schedule": "33 0 * * * ?",
+    "timezone_id": "Europe/Kiev"
+  },
+  "query_lines": [
+    "WITH daily AS (",
+    "    SELECT date_key, COUNT(*) AS rows_cnt",
+    "    FROM dbr_dev_ua5816bd.natalkamartinuk55_gold.fact_volume_sandbox",
+    "    GROUP BY date_key",
+    "),",
+    "ranked AS (",
+    "    SELECT date_key,",
+    "           rows_cnt,",
+    "           ROW_NUMBER() OVER (ORDER BY date_key DESC) AS day_rank",
+    "    FROM daily",
+    ")",
+    "SELECT",
+    "    MAX(CASE WHEN day_rank = 1 THEN date_key END)                       AS latest_date_key,",
+    "    MAX(CASE WHEN day_rank = 1 THEN rows_cnt END)                       AS latest_rows,",
+    "    ROUND(AVG(CASE WHEN day_rank BETWEEN 2 AND 8 THEN rows_cnt END), 1) AS avg_prev_7_days,",
+    "    ROUND(",
+    "        MAX(CASE WHEN day_rank = 1 THEN rows_cnt END) * 100",
+    "        / AVG(CASE WHEN day_rank BETWEEN 2 AND 8 THEN rows_cnt END),1 ) AS volume_pct",
+    "FROM ranked"
+  ]
+}

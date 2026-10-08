@@ -1,0 +1,867 @@
+{
+  "datasets": [
+    {
+      "name": "561f6c1e",
+      "displayName": "agg_category_daily",
+      "config": {
+        "version": "1.1",
+        "source": "dbr_dev_ua5816bd.natalkamartinuk55_gold.agg_category_daily",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "407ea0dc",
+      "displayName": "agg_channel_summary",
+      "config": {
+        "version": "1.1",
+        "source": "dbr_dev_ua5816bd.natalkamartinuk55_gold.agg_channel_summary",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          }
+        ]
+      }
+    },
+    {
+      "name": "f8fbd5d4",
+      "displayName": "trending_videos",
+      "queryLines": [
+        "SELECT\n",
+        "    d.full_date,\n",
+        "    c.category_name,\n",
+        "    ch.channel_title,\n",
+        "    v.video_id,\n",
+        "    v.title,\n",
+        "    f.views,\n",
+        "    f.likes,\n",
+        "    f.views_delta,\n",
+        "    f.trending_day_num\n",
+        "FROM dbr_dev_ua5816bd.natalkamartinuk55_gold.fact_video_daily_stats AS f\n",
+        "JOIN dbr_dev_ua5816bd.natalkamartinuk55_gold.dim_date     AS d  ON f.date_key    = d.date_key\n",
+        "JOIN dbr_dev_ua5816bd.natalkamartinuk55_gold.dim_category AS c  ON f.category_id = c.category_id\n",
+        "JOIN dbr_dev_ua5816bd.natalkamartinuk55_gold.dim_channel  AS ch ON f.channel_key = ch.channel_key\n",
+        "JOIN dbr_dev_ua5816bd.natalkamartinuk55_gold.dim_video    AS v  ON f.video_id    = v.video_id"
+      ],
+      "columns": [
+        {
+          "displayName": "like_rate",
+          "description": "",
+          "expression": "SUM(likes) / SUM(views)"
+        }
+      ]
+    },
+    {
+      "name": "1bfabd29",
+      "displayName": "top_channels",
+      "queryLines": [
+        "SELECT *\n",
+        "FROM dbr_dev_ua5816bd.natalkamartinuk55_gold.agg_channel_summary\n",
+        "ORDER BY total_views DESC\n",
+        "LIMIT 10"
+      ]
+    },
+    {
+      "name": "7f8cd1fa",
+      "displayName": "category_share",
+      "queryLines": [
+        "WITH top5 AS (\n",
+        "    SELECT category_name\n",
+        "    FROM dbr_dev_ua5816bd.natalkamartinuk55_gold.agg_category_daily\n",
+        "    GROUP BY category_name\n",
+        "    ORDER BY SUM(views_gained) DESC\n",
+        "    LIMIT 5\n",
+        ")\n",
+        "SELECT\n",
+        "    a.full_date,\n",
+        "    a.category_name,\n",
+        "    CASE WHEN t.category_name IS NOT NULL THEN a.category_name ELSE 'Other' END AS category_group,\n",
+        "    a.views_gained\n",
+        "FROM dbr_dev_ua5816bd.natalkamartinuk55_gold.agg_category_daily AS a\n",
+        "LEFT JOIN top5 AS t ON a.category_name = t.category_name"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "3c424f39",
+      "displayName": "Overview",
+      "layout": [
+        {
+          "widget": {
+            "name": "videos-in-trending",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "f8fbd5d4",
+                  "fields": [
+                    {
+                      "name": "countdistinct(video_id)",
+                      "expression": "COUNT(DISTINCT `video_id`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "showDescription": false,
+                "title": {
+                  "value": "<span style=\"font-size: 24px;\">Videos in trending</span>",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "style": {
+                "fontColor": {
+                  "light": "#005455"
+                }
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "countdistinct(video_id)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 3,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "views-gained",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "f8fbd5d4",
+                  "fields": [
+                    {
+                      "name": "sum(views_delta)",
+                      "expression": "SUM(`views_delta`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "<span style=\"font-size: 24px;\">Views gained</span>",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "style": {
+                "fontColor": {
+                  "light": "#005455"
+                }
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(views_delta)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 0,
+            "width": 3,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "like-rate",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "f8fbd5d4",
+                  "fields": [
+                    {
+                      "name": "measure(like_rate)",
+                      "expression": "MEASURE(`like_rate`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "<span style=\"font-size: 24px;\">Like rate</span>",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "style": {
+                "fontColor": {
+                  "light": "#005455"
+                }
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(like_rate)",
+                  "format": {
+                    "type": "number-percent",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 9,
+            "y": 0,
+            "width": 3,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "channels",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "f8fbd5d4",
+                  "fields": [
+                    {
+                      "name": "countdistinct(channel_title)",
+                      "expression": "COUNT(DISTINCT `channel_title`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "<span style=\"font-size: 24px;\">Channels</span>",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "style": {
+                "fontColor": {
+                  "light": "#005455"
+                }
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "countdistinct(channel_title)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 3,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "views-gained-per-day",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "561f6c1e",
+                  "fields": [
+                    {
+                      "name": "daily(full_date)",
+                      "expression": "DATE_TRUNC(\"DAY\", `full_date`)"
+                    },
+                    {
+                      "name": "sum(views_gained)",
+                      "expression": "SUM(`views_gained`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "<span style=\"font-size: 24px;\">Views gained per day</span>",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "mark": {
+                "colors": [
+                  "#007475"
+                ]
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "daily(full_date)",
+                  "displayName": " ",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(views_gained)",
+                  "displayName": " ",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "views-by-category",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "561f6c1e",
+                  "fields": [
+                    {
+                      "name": "sum(views_gained)",
+                      "expression": "SUM(`views_gained`)"
+                    },
+                    {
+                      "name": "category_name",
+                      "expression": "`category_name`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "<span style=\"font-size: 24px;\">Views gained by category</span>",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "sum(views_gained)",
+                  "displayName": " ",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "category_name",
+                  "displayName": " ",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "x-reversed"
+                    }
+                  }
+                },
+                "color": {
+                  "fieldName": "sum(views_gained)",
+                  "legend": {
+                    "hide": true
+                  },
+                  "displayName": " ",
+                  "scale": {
+                    "type": "quantitative",
+                    "colorRamp": {
+                      "mode": "custom-sequential",
+                      "colors": {
+                        "start": "#1DB4B4",
+                        "end": "#005455"
+                      }
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 10,
+            "width": 12,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "top-10-channels-by-total-views-all-time",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "1bfabd29",
+                  "fields": [
+                    {
+                      "name": "sum(total_views)",
+                      "expression": "SUM(`total_views`)"
+                    },
+                    {
+                      "name": "channel_title",
+                      "expression": "`channel_title`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "<span style=\"font-size: 24px;\">Top 10 channels by total views (all time)</span>",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "sum(total_views)",
+                  "displayName": " ",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "channel_title",
+                  "displayName": " ",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "x-reversed"
+                    }
+                  }
+                },
+                "color": {
+                  "fieldName": "sum(total_views)",
+                  "legend": {
+                    "hide": true
+                  },
+                  "scale": {
+                    "type": "quantitative",
+                    "colorRamp": {
+                      "mode": "custom-sequential",
+                      "colors": {
+                        "start": "#1DB4B4",
+                        "end": "#005455"
+                      }
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 17,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "share-of-views-gained",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "7f8cd1fa",
+                  "fields": [
+                    {
+                      "name": "sum(views_gained)",
+                      "expression": "SUM(`views_gained`)"
+                    },
+                    {
+                      "name": "category_group",
+                      "expression": "`category_group`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "<span style=\"font-size: 24px;\">Share of views gained</span>",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "sum(views_gained)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": " "
+                },
+                "color": {
+                  "fieldName": "category_group",
+                  "displayName": "Group",
+                  "scale": {
+                    "type": "categorical",
+                    "mappings": [
+                      {
+                        "value": "Music",
+                        "color": "#005455"
+                      },
+                      {
+                        "value": "Entertainment",
+                        "color": "#007475"
+                      },
+                      {
+                        "value": "Other",
+                        "color": "#009595"
+                      },
+                      {
+                        "value": "Film & Animation",
+                        "color": "#1DB4B4"
+                      },
+                      {
+                        "value": "Comedy",
+                        "color": "#72D0D0"
+                      },
+                      {
+                        "value": "People & Blogs",
+                        "color": "#C3C2B7"
+                      }
+                    ]
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 17,
+            "width": 6,
+            "height": 7
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "019b3dd1",
+      "displayName": "Global Filters",
+      "layout": [
+        {
+          "widget": {
+            "name": "period",
+            "queries": [
+              {
+                "name": "dashboards/01f1c1accc401905ad77915e3b2fdacb/datasets/01f1c1ad082c15818ee6b9e5fed63615_full_date",
+                "query": {
+                  "datasetName": "f8fbd5d4",
+                  "fields": [
+                    {
+                      "name": "full_date",
+                      "expression": "`full_date`"
+                    },
+                    {
+                      "name": "full_date_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f1c1accc401905ad77915e3b2fdacb/datasets/01f1c1acedea1cdbac839b0334ab3641_full_date",
+                "query": {
+                  "datasetName": "561f6c1e",
+                  "fields": [
+                    {
+                      "name": "full_date",
+                      "expression": "`full_date`"
+                    },
+                    {
+                      "name": "full_date_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f1c1accc401905ad77915e3b2fdacb/datasets/01f1c1b512691fab97ec40db9817c500_full_date",
+                "query": {
+                  "datasetName": "7f8cd1fa",
+                  "fields": [
+                    {
+                      "name": "full_date",
+                      "expression": "`full_date`"
+                    },
+                    {
+                      "name": "full_date_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "selection": {
+                "defaultSelection": {
+                  "range": {
+                    "dataType": "DATE",
+                    "min": {
+                      "value": "2017-11-14T00:00:00.000"
+                    },
+                    "max": {
+                      "value": "2018-06-14T23:59:59.999"
+                    }
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Period",
+                  "fields": []
+                }
+              },
+              "widgetType": "filter-date-range-picker",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "full_date",
+                    "queryName": "dashboards/01f1c1accc401905ad77915e3b2fdacb/datasets/01f1c1ad082c15818ee6b9e5fed63615_full_date"
+                  },
+                  {
+                    "fieldName": "full_date",
+                    "queryName": "dashboards/01f1c1accc401905ad77915e3b2fdacb/datasets/01f1c1acedea1cdbac839b0334ab3641_full_date"
+                  },
+                  {
+                    "fieldName": "full_date",
+                    "queryName": "dashboards/01f1c1accc401905ad77915e3b2fdacb/datasets/01f1c1b512691fab97ec40db9817c500_full_date"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "category",
+            "queries": [
+              {
+                "name": "dashboards/01f1c1accc401905ad77915e3b2fdacb/datasets/01f1c1ad082c15818ee6b9e5fed63615_category_name",
+                "query": {
+                  "datasetName": "f8fbd5d4",
+                  "fields": [
+                    {
+                      "name": "category_name",
+                      "expression": "`category_name`"
+                    },
+                    {
+                      "name": "category_name_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f1c1accc401905ad77915e3b2fdacb/datasets/01f1c1acedea1cdbac839b0334ab3641_category_name",
+                "query": {
+                  "datasetName": "561f6c1e",
+                  "fields": [
+                    {
+                      "name": "category_name",
+                      "expression": "`category_name`"
+                    },
+                    {
+                      "name": "category_name_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f1c1accc401905ad77915e3b2fdacb/datasets/01f1c1b512691fab97ec40db9817c500_category_name",
+                "query": {
+                  "datasetName": "7f8cd1fa",
+                  "fields": [
+                    {
+                      "name": "category_name",
+                      "expression": "`category_name`"
+                    },
+                    {
+                      "name": "category_name_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Category",
+                  "fields": []
+                }
+              },
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "category_name",
+                    "queryName": "dashboards/01f1c1accc401905ad77915e3b2fdacb/datasets/01f1c1ad082c15818ee6b9e5fed63615_category_name"
+                  },
+                  {
+                    "fieldName": "category_name",
+                    "queryName": "dashboards/01f1c1accc401905ad77915e3b2fdacb/datasets/01f1c1acedea1cdbac839b0334ab3641_category_name"
+                  },
+                  {
+                    "fieldName": "category_name",
+                    "queryName": "dashboards/01f1c1accc401905ad77915e3b2fdacb/datasets/01f1c1b512691fab97ec40db9817c500_category_name"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 1,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "canvasBackgroundColor": {
+        "light": "#FAFAFB",
+        "dark": "#1F272D"
+      },
+      "widgetBackgroundColor": {
+        "light": "#FFFFFF",
+        "dark": "#11171C"
+      },
+      "fontColor": {
+        "light": "#11171C",
+        "dark": "#E8ECF0"
+      },
+      "selectionColor": {
+        "light": "#2272B4",
+        "dark": "#8ACAFF"
+      },
+      "visualizationColors": [
+        "#007475",
+        "#009595",
+        "#1DB4B4",
+        "#005455",
+        "#EB6834"
+      ],
+      "widgetHeaderAlignment": "LEFT"
+    },
+    "applyModeEnabled": false
+  }
+}

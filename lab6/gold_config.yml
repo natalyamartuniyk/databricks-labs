@@ -1,0 +1,29 @@
+dev:
+  catalog: dbr_dev_ua5816bd
+  silver_schema: natalkamartinuk55_silver
+  gold_schema: natalkamartinuk55_gold
+  source:
+    videos_silver: youtube_videos_ldp_silver
+  gold_tables:
+    dim_category: dim_category
+    dim_channel: dim_channel
+    dim_video: dim_video
+    dim_date: dim_date
+    fact_video_daily_stats: fact_video_daily_stats
+    agg_category_daily: agg_category_daily
+    agg_channel_summary: agg_channel_summary
+
+prod:
+  catalog: dbr_prod_ua5816bd
+  silver_schema: natalkamartinuk55_silver
+  gold_schema: natalkamartinuk55_gold
+  source:
+    videos_silver: youtube_videos_ldp_silver
+  gold_tables:
+    dim_category: dim_category
+    dim_channel: dim_channel
+    dim_video: dim_video
+    dim_date: dim_date
+    fact_video_daily_stats: fact_video_daily_stats
+    agg_category_daily: agg_category_daily
+    agg_channel_summary: agg_channel_summary
