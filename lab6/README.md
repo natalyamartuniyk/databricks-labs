@@ -99,8 +99,6 @@ Test of the tricky question *"How many views did Music get in March 2018?"*: Gen
 `SUM(views_gained)` from `agg_category_daily` joined to `dim_date` (not `SUM(views)`), which shows that
 the instructions and the documented model work.
 
-![Genie](screenshots/03_genie.png)
-
 ## Alert
 
 **Metric:** `volume_pct` = rows on the latest day / average rows over the previous 7 days × 100.
@@ -128,8 +126,6 @@ Note: in this training workspace the `students` group has `ALL PRIVILEGES` on th
 inherited by every table and cannot be restricted at table level. In production, catalog-level grants
 would be limited to `USE CATALOG`, and data access would be granted per schema and table.
 
-![Grants](screenshots/06_grants.png)
-
 **Entitlement table.** Workspace groups can only be created by an admin, so access rules are stored in
 `access_rules` (`user_email`, `allowed_category_id` where `NULL` means all categories, `can_see_dislikes`).
 Rules are changed by updating data, not code. Users without a rule see nothing (**deny by default**).
@@ -144,10 +140,6 @@ also `NULL` and cannot leak the values.
 
 **Verification.** The same queries were run before and after changing the current user's rule:
 all 16 categories → only Music, real dislikes → `NULL`. The dashboard and Genie showed only Music too.
-
-![RLS](screenshots/07_rls_before_after.png)
-
-![CLS](screenshots/08_cls_before_after.png)
 
 ## Known limitations
 
