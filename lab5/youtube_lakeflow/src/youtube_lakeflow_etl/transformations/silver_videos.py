@@ -1,7 +1,6 @@
 from pyspark import pipelines as dp
 from pyspark.sql.functions import col, trim, coalesce, lit, current_timestamp
 
-CATALOG = spark.conf.get("youtube.catalog")
 SILVER_SCHEMA = spark.conf.get("youtube.silver_schema")
 
 VIDEO_QUALITY_RULES = {
@@ -28,7 +27,7 @@ def _typed_videos_stream():
 
 
 @dp.table(
-    name=f"{CATALOG}.{SILVER_SCHEMA}.youtube_videos_ldp_silver",
+    name=f"{SILVER_SCHEMA}.youtube_videos_ldp_silver",
     comment="Cleaned YouTube video metadata that passed all quality expectations",
     table_properties={"pipelines.reset.allowed": "false"},
 )
@@ -38,7 +37,7 @@ def youtube_videos_silver():
 
 
 @dp.table(
-    name=f"{CATALOG}.{SILVER_SCHEMA}.youtube_videos_ldp_quarantine",
+    name=f"{SILVER_SCHEMA}.youtube_videos_ldp_quarantine",
     comment="Video rows that failed quality expectations, kept here for investigation instead of being silently dropped",
     table_properties={"pipelines.reset.allowed": "false"},
 )
