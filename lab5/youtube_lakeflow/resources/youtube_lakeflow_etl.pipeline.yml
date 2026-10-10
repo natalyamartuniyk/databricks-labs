@@ -10,7 +10,6 @@ resources:
       root_path: "../src/youtube_lakeflow_etl"
 
       configuration:
-        youtube.catalog: ${var.catalog}
         youtube.bronze_schema: ${var.bronze_schema}
         youtube.silver_schema: ${var.silver_schema}
         youtube.gold_schema: ${var.gold_schema}
