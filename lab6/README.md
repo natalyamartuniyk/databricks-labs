@@ -60,7 +60,7 @@ In Databricks PK/FK constraints are informational: they document the model for p
 | Job `youtube_gold_daily_refresh` | Runs `01` → `02` → `03` → `04` daily; `05` (demo) and `06` (one-time setup) are not part of the schedule |
 | `YouTube Trending Analytics.lvdash.json` | AI/BI dashboard |
 
-**Run order:** `01_gold_ddl` → `02_gold_dimensions` → `03_gold_facts` → `04_gold_aggregates` → `06_governance`.
+**Run order:**`02_gold_dimensions` → `03_gold_facts` → `04_gold_aggregates`.
 
 ## Dashboard
 
