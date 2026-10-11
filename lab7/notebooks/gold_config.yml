@@ -1,0 +1,37 @@
+dev:
+  catalog: dbr_dev_ua5816bd
+  silver_schema: natalkamartinuk55_silver
+  gold_schema: natalkamartinuk55_gold
+  source:
+    videos_silver: youtube_videos_ldp_silver
+  trending_period: 
+    start: "2017-11-14"
+    end: "2018-06-14"
+  reviewer_email: lbiel@softserve.academy
+  gold_tables:
+    - dim_category
+    - dim_channel
+    - dim_video
+    - dim_date
+    - fact_video_daily_stats
+    - agg_category_daily
+    - agg_channel_summary
+
+prod:
+  catalog: dbr_prod_ua5816bd
+  silver_schema: natalkamartinuk55_silver
+  gold_schema: natalkamartinuk55_gold
+  source:
+    videos_silver: youtube_videos_ldp_silver
+  trending_period:
+    start: "2017-11-14"
+    end: "2018-06-14"
+  reviewer_email: lbiel@softserve.academy
+  gold_tables:
+    - dim_category
+    - dim_channel
+    - dim_video
+    - dim_date
+    - fact_video_daily_stats
+    - agg_category_daily
+    - agg_channel_summary
