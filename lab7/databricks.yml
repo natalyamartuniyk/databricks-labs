@@ -1,0 +1,25 @@
+bundle:
+  name: youtube_gold_tests
+
+sync:
+  exclude:
+    - .venv
+    - .pytest_cache
+    - "**/__pycache__"
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: https://adb-7405604651938730.10.azuredatabricks.net
+
+resources:
+  jobs:
+    unit_tests:
+      name: lab7_unit_tests
+      tasks:
+        - task_key: run_pytest
+          existing_cluster_id: 0828-065013-gln8ogbm
+          notebook_task:
+            notebook_path: ./notebooks/run_unit_tests.py
