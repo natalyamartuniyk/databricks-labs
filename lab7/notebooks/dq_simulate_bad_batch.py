@@ -9,6 +9,11 @@
 
 # COMMAND ----------
 
+dbutils.widgets.dropdown("scenario", "bad_rows", ["bad_rows", "bad_date_format"], "Scenario")
+scenario = dbutils.widgets.get("scenario")
+
+# COMMAND ----------
+
 import time
 from pyspark.sql import functions as F
 
@@ -30,14 +35,21 @@ def case(title, **overrides):
     return df
 
 
-cases = [
-    case("DQ test: missing video_id", video_id=None),
-    case("DQ test: negative views", video_id="DQTEST00002", views="-5"),
-    case("DQ test: missing video_id and negative likes", video_id=None, likes="-1"),
-    case("DQ test: short video_id", video_id="DQTEST4"),
-    case("DQ test: unknown category", video_id="DQTEST00005", category_id="99"),
-    case("DQ test: published after trending", video_id="DQTEST00006", publish_time="2030-01-01T00:00:00.000Z"),
-]
+if scenario == "bad_rows":
+    cases = [
+        case("DQ test: missing video_id", video_id=None),
+        case("DQ test: negative views", video_id="DQTEST00002", views="-5"),
+        case("DQ test: missing video_id and negative likes", video_id=None, likes="-1"),
+        case("DQ test: short video_id", video_id="DQTEST4"),
+        case("DQ test: unknown category", video_id="DQTEST00005", category_id="99"),
+        case("DQ test: published after trending", video_id="DQTEST00006",
+             publish_time="2030-01-01T00:00:00.000Z"),
+    ]
+else:
+    cases = [
+        case("DQ test: wrong trending_date format", video_id="DQTEST00007",
+             trending_date="2026-10-13"),
+    ]
 
 batch = cases[0]
 for df in cases[1:]:
