@@ -1,9 +1,12 @@
 dev:
   catalog: dbr_dev_ua5816bd
+  bronze_schema: natalkamartinuk55_bronze
   silver_schema: natalkamartinuk55_silver
   gold_schema: natalkamartinuk55_gold
   source:
+    videos_bronze: youtube_videos_files_bronze
     videos_silver: youtube_videos_ldp_silver
+    raw_volume: natalkamartinuk55/raw_data
   trending_period: 
     start: "2017-11-14"
     end: "2018-06-14"
@@ -18,11 +21,14 @@ dev:
     - agg_channel_summary
 
 prod:
-  catalog: dbr_prod_ua5816bd
+  catalog: dbr_dev_ua5816bd
+  bronze_schema: natalkamartinuk55_bronze
   silver_schema: natalkamartinuk55_silver
   gold_schema: natalkamartinuk55_gold
   source:
+    videos_bronze: youtube_videos_files_bronze
     videos_silver: youtube_videos_ldp_silver
+    raw_volume: natalkamartinuk55/raw_data
   trending_period:
     start: "2017-11-14"
     end: "2018-06-14"
