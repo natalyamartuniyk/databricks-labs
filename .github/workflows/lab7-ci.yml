@@ -1,0 +1,34 @@
+name: Lab 7 CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "lab7/**"
+      - ".github/workflows/lab7-ci.yml"
+  workflow_dispatch:
+
+jobs:
+  tests-and-dq-gate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: lab7
+    env:
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Deploy bundle
+        run: databricks bundle deploy -t dev
+
+      - name: Run unit tests
+        run: databricks bundle run unit_tests -t dev
+
+      - name: Run data quality gate
+        run: databricks bundle run dq_suite -t dev
