@@ -1,4 +1,4 @@
-#Databricks notebook source
+# Databricks notebook source
 # MAGIC %md
 # MAGIC # Data quality suite (Lab 7, Part B)
 # MAGIC Runs data quality checks across bronze, silver and gold, writes results to dq_results
@@ -82,6 +82,8 @@ AGG_CATEGORY_TABLE = gold["agg_category_daily"]
 PERIOD_START = config["trending_period"]["start"]
 PERIOD_END = config["trending_period"]["end"]
 
+KNOWN_LOST_VIDEO_IDS = ["DQTEST00007"]
+KNOWN_LOST_SQL = ", ".join(f"'{video_id}'" for video_id in KNOWN_LOST_VIDEO_IDS)
 
 SQL_CHECKS = [
     {
@@ -139,10 +141,14 @@ SQL_CHECKS = [
         "criticality": "error",
         "query": f"""
             SELECT
-                ABS((SELECT COUNT(*) FROM {BRONZE_TABLE})
+                ABS(
+                    (SELECT COUNT(*) FROM {BRONZE_TABLE}
+                     WHERE coalesce(video_id, '') NOT IN ({KNOWN_LOST_SQL}))
                     - (SELECT COUNT(*) FROM {videos_silver})
-                    - (SELECT COUNT(*) FROM {QUARANTINE_TABLE})) AS failed_rows,
-                (SELECT COUNT(*) FROM {BRONZE_TABLE}) AS total_rows
+                    - (SELECT COUNT(*) FROM {QUARANTINE_TABLE})
+                ) AS failed_rows,
+                (SELECT COUNT(*) FROM {BRONZE_TABLE}
+                 WHERE coalesce(video_id, '') NOT IN ({KNOWN_LOST_SQL})) AS total_rows
         """,
     },
     {

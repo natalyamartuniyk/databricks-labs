@@ -24,3 +24,14 @@ resources:
           existing_cluster_id: 0828-065013-gln8ogbm
           notebook_task:
             notebook_path: ./notebooks/run_unit_tests.py
+
+    dq_suite:
+      name: lab7_dq_suite
+      tasks:
+        - task_key: run_dq_suite
+          existing_cluster_id: 0828-065013-gln8ogbm
+          notebook_task:
+            notebook_path: ./notebooks/05_dq_suite.py
+            base_parameters:
+              env: dev
+
