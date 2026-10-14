@@ -27,6 +27,9 @@ resources:
 
     dq_suite:
       name: lab7_dq_suite
+      email_notifications:
+        on_failure:
+          - ${workspace.current_user.userName} 
       tasks:
         - task_key: run_dq_suite
           existing_cluster_id: 0828-065013-gln8ogbm
