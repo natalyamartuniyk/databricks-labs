@@ -4,7 +4,7 @@ fact_video_daily_stats:
     check:
       function: is_unique
       arguments:
-      columns: [video_id, date_key]
+       columns: [video_id, date_key]
 
   - name: views_non_negative
     criticality: error
