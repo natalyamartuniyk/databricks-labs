@@ -6,6 +6,7 @@ sync:
     - .venv
     - .pytest_cache
     - "**/__pycache__"
+    - youtube_lakeflow
 
 targets:
   dev:

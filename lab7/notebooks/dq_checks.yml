@@ -1,0 +1,117 @@
+fact_video_daily_stats:
+  - name: fact_grain_unique
+    criticality: error
+    check:
+      function: is_unique
+      arguments:
+      columns: [video_id, date_key]
+
+  - name: views_non_negative
+    criticality: error
+    check:
+      function: is_not_less_than
+      arguments:
+        column: views
+        limit: 0
+  - name: likes_non_negative
+    criticality: error
+    check:
+      function: is_not_less_than
+      arguments:
+        column: likes
+        limit: 0
+  - name: dislikes_non_negative
+    criticality: error
+    check:
+      function: is_not_less_than
+      arguments:
+        column: dislikes
+        limit: 0
+  - name: comment_count_non_negative
+    criticality: error
+    check:
+      function: is_not_less_than
+      arguments:
+        column: comment_count
+        limit: 0
+
+  - name: trending_day_num_positive
+    criticality: error
+    check: 
+      function: is_not_less_than
+      arguments:
+        column: trending_day_num
+        limit: 1
+
+  - name: views_delta_only_after_first_day
+    criticality: error
+    check:
+      function: sql_expression
+      arguments:
+        expression: (trending_day_num = 1) = (views_delta IS NULL)
+        msg: views_delta must be NULL only on the first trending day
+
+  - name: views_delta_non_negative
+    criticality: warn
+    check:
+      function: is_not_less_than
+      arguments:
+        column: views_delta
+        limit: 0
+
+  - name: fk_channel_key
+    criticality: error
+    check:
+      function: foreign_key
+      arguments:
+        columns: [channel_key]
+        ref_columns: [channel_key]
+        ref_df_name: dim_channel
+  - name: fk_category_id
+    criticality: error
+    check:
+      function: foreign_key
+      arguments:
+        columns: [category_id]
+        ref_columns: [category_id]
+        ref_df_name: dim_category
+  - name: fk_date_key
+    criticality: error
+    check:
+      function: foreign_key
+      arguments:
+        columns: [date_key]
+        ref_columns: [date_key]
+        ref_df_name: dim_date
+  - name: fk_video_id
+    criticality: error
+    check:
+      function: foreign_key
+      arguments:
+        columns: [video_id]
+        ref_columns: [video_id]
+        ref_df_name: dim_video
+
+dim_channel:
+  - name: dim_channel_key_unique
+    criticality: error
+    check:
+      function: is_unique
+      arguments:
+        columns: [channel_key]
+
+dim_video:
+  - name: dim_video_id_unique
+    criticality: error
+    check:
+      function: is_unique
+      arguments:
+        columns: [video_id]
+
+dim_date:
+  - name: dim_date_key_unique
+    criticality: error
+    check:
+      function: is_unique
+      arguments:
+        columns: [date_key]

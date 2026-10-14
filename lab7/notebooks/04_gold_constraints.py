@@ -48,8 +48,8 @@ except Exception as error:
     print("Insert rejected:")
     print(str(error)[:500])
 
-display(spark.sql(f"SELECT COUNT(*) AS test_rows FROM {dim_date} WHERE year = 2099")
-
+display(spark.sql(f"SELECT COUNT(*) AS test_rows FROM {dim_date} WHERE year = "2099")
+                  
 # COMMAND ----------
 
 spark.sql(f"DELETE FROM {dim_date} WHERE year = 2099")

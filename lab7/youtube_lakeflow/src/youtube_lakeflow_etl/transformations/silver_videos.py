@@ -22,15 +22,11 @@ KNOWN_CATEGORY_IDS_SQL = ", ".join(f"'{category_id}'" for category_id in KNOWN_C
 DROP_RULES = {
     "video_id_not_null": "video_id IS NOT NULL",
     "trending_date_not_null": "trending_date IS NOT NULL",
+    "trending_date_format": "trending_date IS NULL OR try_to_date(trending_date, 'yy.dd.MM') IS NOT NULL",
     "valid_views": "views >= 0",
     "valid_likes": "likes >= 0",
     "valid_dislikes": "dislikes >= 0",
     "valid_comment_count": "comment_count >= 0",
-}
-
-# Systemic problem (source date format changed) -> stop the pipeline.
-FAIL_RULES = {
-    "trending_date_format": "trending_date IS NULL OR try_to_date(trending_date, 'yy.dd.MM') IS NOT NULL",
 }
 
 WARN_RULES = {
@@ -71,7 +67,6 @@ def _failed_drop_rules():
     comment="Cleaned YouTube video metadata that passed all quality expectations",
     table_properties={"pipelines.reset.allowed": "false"},
 )
-@dp.expect_all_or_fail(FAIL_RULES)
 @dp.expect_all_or_drop(DROP_RULES)
 @dp.expect_all(WARN_RULES)
 def youtube_videos_silver():

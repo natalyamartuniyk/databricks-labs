@@ -10,6 +10,10 @@
 
 # COMMAND ----------
 
+dbutils.library.restartPython()
+
+# COMMAND ----------
+
 from importlib.metadata import version
 
 print("DQX version:", version("databricks-labs-dqx"))
