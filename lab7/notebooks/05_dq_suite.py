@@ -77,6 +77,10 @@ from datetime import datetime, timezone
 BRONZE_TABLE = f"{catalog}.{config['bronze_schema']}.{config['source']['videos_bronze']}"
 QUARANTINE_TABLE = f"{catalog}.{config['silver_schema']}.{config['source']['videos_quarantine']}"
 DQ_RESULTS_TABLE = f"{catalog}.{config['gold_schema']}.dq_results"
+FACT_TABLE = gold["fact_video_daily_stats"]
+AGG_CATEGORY_TABLE = gold["agg_category_daily"]
+PERIOD_START = config["trending_period"]["start"]
+PERIOD_END = config["trending_period"]["end"]
 
 
 SQL_CHECKS = [
@@ -126,6 +130,45 @@ SQL_CHECKS = [
                         THEN 0 ELSE 1 END AS failed_rows,
                    1 AS total_rows
             FROM {videos_silver}
+        """,
+    },
+    {
+        "layer": "reconciliation",
+        "table_name": "bronze -> silver + quarantine",
+        "check_name": "bronze_equals_silver_plus_quarantine",
+        "criticality": "error",
+        "query": f"""
+            SELECT
+                ABS((SELECT COUNT(*) FROM {BRONZE_TABLE})
+                    - (SELECT COUNT(*) FROM {videos_silver})
+                    - (SELECT COUNT(*) FROM {QUARANTINE_TABLE})) AS failed_rows,
+                (SELECT COUNT(*) FROM {BRONZE_TABLE}) AS total_rows
+        """,
+    },
+    {
+        "layer": "reconciliation",
+        "table_name": "silver -> fact_video_daily_stats",
+        "check_name": "silver_video_days_equal_fact_rows",
+        "criticality": "error",
+        "query": f"""
+            SELECT
+                ABS((SELECT COUNT(DISTINCT video_id, try_to_date(trending_date, 'yy.dd.MM'))
+                     FROM {videos_silver}
+                     WHERE try_to_date(trending_date, 'yy.dd.MM') BETWEEN '{PERIOD_START}' AND '{PERIOD_END}')
+                    - (SELECT COUNT(*) FROM {FACT_TABLE})) AS failed_rows,
+                (SELECT COUNT(*) FROM {FACT_TABLE}) AS total_rows
+        """,
+    },
+    {
+        "layer": "reconciliation",
+        "table_name": "fact_video_daily_stats -> agg_category_daily",
+        "check_name": "fact_views_delta_equals_agg_views",
+        "criticality": "error",
+        "query": f"""
+            SELECT
+                ABS((SELECT COALESCE(SUM(views_delta), 0) FROM {FACT_TABLE})
+                    - (SELECT COALESCE(SUM(views_gained), 0) FROM {AGG_CATEGORY_TABLE})) AS failed_rows,
+                (SELECT COALESCE(SUM(views_delta), 0) FROM {FACT_TABLE}) AS total_rows
         """,
     },
 ]
