@@ -20,6 +20,7 @@ dev:
     - fact_video_daily_stats
     - agg_category_daily
     - agg_channel_summary
+  known_lost_video_ids: ["DQTEST00007"]
 
 prod:
   catalog: dbr_dev_ua5816bd
@@ -43,3 +44,4 @@ prod:
     - fact_video_daily_stats
     - agg_category_daily
     - agg_channel_summary
+  known_lost_video_ids: ["DQTEST00007"]

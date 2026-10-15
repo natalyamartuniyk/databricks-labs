@@ -58,7 +58,7 @@ def make_history(spark):
     )
 
 
-def test_views_delta_null_orfirst_day_then_difference(spark):
+def test_views_delta_null_or_first_day_then_difference(spark):
     result = add_views_delta(make_history(spark))
 
     delta = {(row["video_id"], row["trending_dt"]): row["views_delta"] for row in result.collect()}

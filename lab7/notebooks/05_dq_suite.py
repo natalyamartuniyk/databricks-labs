@@ -82,7 +82,7 @@ AGG_CATEGORY_TABLE = gold["agg_category_daily"]
 PERIOD_START = config["trending_period"]["start"]
 PERIOD_END = config["trending_period"]["end"]
 
-KNOWN_LOST_VIDEO_IDS = ["DQTEST00007"]
+KNOWN_LOST_VIDEO_IDS = config["known_lost_video_ids"]
 KNOWN_LOST_SQL = ", ".join(f"'{video_id}'" for video_id in KNOWN_LOST_VIDEO_IDS)
 
 SQL_CHECKS = [
@@ -151,7 +151,7 @@ SQL_CHECKS = [
                  WHERE coalesce(video_id, '') NOT IN ({KNOWN_LOST_SQL})) AS total_rows
         """,
     },
-    {
+        {
         "layer": "reconciliation",
         "table_name": "silver -> fact_video_daily_stats",
         "check_name": "silver_video_days_equal_fact_rows",
@@ -162,7 +162,9 @@ SQL_CHECKS = [
                      FROM {videos_silver}
                      WHERE try_to_date(trending_date, 'yy.dd.MM') BETWEEN '{PERIOD_START}' AND '{PERIOD_END}')
                     - (SELECT COUNT(*) FROM {FACT_TABLE})) AS failed_rows,
-                (SELECT COUNT(*) FROM {FACT_TABLE}) AS total_rows
+                (SELECT COUNT(DISTINCT video_id, try_to_date(trending_date, 'yy.dd.MM'))
+                 FROM {videos_silver}
+                 WHERE try_to_date(trending_date, 'yy.dd.MM') BETWEEN '{PERIOD_START}' AND '{PERIOD_END}') AS total_rows
         """,
     },
     {
@@ -202,8 +204,16 @@ run_at = datetime.now(timezone.utc)
 results_df = (
     spark.createDataFrame(dqx_results + sql_results)
     .withColumn("run_at", F.lit(run_at))
-    .withColumn("failed_ratio", F.when(F.col("total_rows") > 0, F.col("failed_rows") / F.col("total_rows")).otherwise(F.lit(0.0)),)
-    .withColumn("passed", F.col("failed_ratio") <= F.col("max_failed_ratio"))
+    .withColumn(
+        "failed_ratio",
+        F.when(F.col("total_rows") > 0, F.col("failed_rows") / F.col("total_rows"))
+         .when(F.col("failed_rows") > 0, F.lit(1.0))
+         .otherwise(F.lit(0.0)),
+    )
+    .withColumn(
+        "passed",
+        F.coalesce(F.col("failed_ratio") <= F.col("max_failed_ratio"), F.lit(False)),
+    )
     .select(
         "run_at", "layer", "table_name", "check_name", "criticality",
         "failed_rows", "total_rows", "failed_ratio", "max_failed_ratio", "passed",
