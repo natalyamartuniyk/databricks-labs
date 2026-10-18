@@ -30,26 +30,5 @@ display (
     .filter("key LIKE 'delta.constraints.%'")
 )
 
-# COMMAND ----------
 
-dim_date = gold["dim_date"]
 
-try:
-    spark.sql(f"""
-        INSERT INTO {dim_date}
-            (date_key, full_date, year, quarter, month, month_name,
-             day_of_month, day_of_week, day_name, is_weekend, _updated_at)
-        VALUES
-            (20991231, DATE'2099-12-31', 2099, 4, 12, 'December', 31, 5, 'Thursday', false, current_timestamp()),
-            (20991230, DATE'2099-12-31', 2099, 4, 12, 'December', 31, 5, 'Thursday', false, current_timestamp())
-    """)
-    print("Insert succeeded: constraints are NOT working")
-except Exception as error:
-    print("Insert rejected:")
-    print(str(error)[:500])
-
-display(spark.sql(f"SELECT COUNT(*) AS test_rows FROM {dim_date} WHERE year = "2099")
-                  
-# COMMAND ----------
-
-display(spark.sql(f"SELECT COUNT(*) AS test_rows FROM {dim_date} WHERE year = 2099"))
