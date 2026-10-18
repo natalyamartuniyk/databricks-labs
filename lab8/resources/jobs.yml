@@ -1,0 +1,78 @@
+resources:
+  jobs:
+    gold_setup:
+      name: youtube_gold_setup
+      max_concurrent_runs: 1
+      email_notifications:
+        on_failure:
+          - natalkamartinuk55@softserve.academy
+      parameters:
+        - name: catalog
+          default: ${var.catalog}
+        - name: bronze_schema
+          default: ${var.bronze_schema}
+        - name: silver_schema
+          default: ${var.silver_schema}
+        - name: gold_schema
+          default: ${var.gold_schema}
+      tasks:
+        - task_key: gold_ddl
+          timeout_seconds: 3600
+          max_retries: 1
+          notebook_task:
+            notebook_path: ../notebooks/01_gold_ddl.ipynb
+
+        - task_key: gold_constraints
+          timeout_seconds: 3600
+          max_retries: 1
+          depends_on:
+            - task_key: gold_ddl
+          notebook_task:
+            notebook_path: ../notebooks/04_gold_constraints.py
+
+    youtube_etl:
+      name: youtube_etl
+      max_concurrent_runs: 1
+      email_notifications:
+        on_failure:
+          - natalkamartinuk55@softserve.academy
+      parameters:
+        - name: catalog
+          default: ${var.catalog}
+        - name: bronze_schema
+          default: ${var.bronze_schema}
+        - name: silver_schema
+          default: ${var.silver_schema}
+        - name: gold_schema
+          default: ${var.gold_schema}
+      tasks:
+        - task_key: refresh_pipeline
+          timeout_seconds: 3600
+          max_retries: 1
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.youtube_lakeflow_etl.id}
+
+        - task_key: gold_dimensions
+          timeout_seconds: 3600
+          max_retries: 1
+          depends_on:
+            - task_key: refresh_pipeline
+          notebook_task:
+            notebook_path: ../notebooks/02_gold_dimensions.ipynb
+
+        - task_key: gold_facts
+          timeout_seconds: 3600
+          max_retries: 1
+          depends_on:
+            - task_key: gold_dimensions
+          notebook_task:
+            notebook_path: ../notebooks/03_gold_facts.ipynb
+
+        - task_key: gold_aggregates
+          timeout_seconds: 3600
+          max_retries: 1
+          depends_on:
+            - task_key: gold_facts
+          notebook_task:
+            notebook_path: ../notebooks/06_gold_aggregates.ipynb
+
