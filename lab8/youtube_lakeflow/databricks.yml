@@ -1,0 +1,46 @@
+bundle:
+  name: youtube_lakeflow
+  uuid: eaf95f08-92d6-4ea5-8b30-d3558c55e8c8
+
+include:
+  - resources/*.yml
+
+# Variable declarations. These variables are assigned in the dev/prod targets below.
+variables:
+  catalog:
+    description: Unity Catalog catalog for pipeline tables
+  bronze_schema:
+    description: Schema for raw (bronze) tables
+  silver_schema:
+    description: Schema for cleaned (silver) tables
+  gold_schema:
+    description: Schema for aggregated (gold) tables
+  raw_volume_path:
+    description: Volume folder with raw source files
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: https://adb-7405604651938730.10.azuredatabricks.net
+    variables:
+      catalog: dbr_dev_ua5816bd
+      bronze_schema: natalkamartinuk55_bronze
+      silver_schema: natalkamartinuk55_silver
+      gold_schema: natalkamartinuk55_gold
+      raw_volume_path: /Volumes/dbr_dev_ua5816bd/natalkamartinuk55/raw_data
+  prod:
+    mode: production
+    workspace:
+      host: https://adb-7405604651938730.10.azuredatabricks.net
+      root_path: /Workspace/Users/natalkamartinuk55@softserve.academy/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      catalog: dbr_dev_ua5816bd
+      bronze_schema: natalkamartinuk55_bronze
+      silver_schema: natalkamartinuk55_silver
+      gold_schema: natalkamartinuk55_gold
+      raw_volume_path: /Volumes/dbr_prod_ua5816bd/natalkamartinuk55/raw_data
+    permissions:
+      - user_name: natalkamartinuk55@softserve.academy
+        level: CAN_MANAGE
