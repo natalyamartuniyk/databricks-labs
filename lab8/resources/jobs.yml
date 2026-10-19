@@ -45,10 +45,21 @@ resources:
           default: ${var.silver_schema}
         - name: gold_schema
           default: ${var.gold_schema}
+        - name: raw_source_path
+          default: ${var.raw_source_path}
+        - name: raw_volume_path
+          default: ${var.raw_volume_path}
       tasks:
+        - task_key: copy_raw_files
+          timeout_seconds: 1800
+          max_retries: 1
+          notebook_task:
+            notebook_path: ../notebooks/07_copy_raw_files.py
         - task_key: refresh_pipeline
           timeout_seconds: 3600
           max_retries: 1
+          depends_on:
+            - task_key: copy_raw_files
           pipeline_task:
             pipeline_id: ${resources.pipelines.youtube_lakeflow_etl.id}
 

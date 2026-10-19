@@ -16,7 +16,9 @@ variables:
     description: Schema for dimensions and facts (gold)
   raw_volume_path:
     description: Volume folder with raw source files
-
+  raw_source_path:
+    description: Volume folder with the original source files (copied to the target raw volume)
+    default: /Volumes/dbr_dev_ua5816bd/natalkamartinuk55/raw_data
 targets:
   dev:
     mode: development
