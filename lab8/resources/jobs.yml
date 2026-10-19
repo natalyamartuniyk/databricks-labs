@@ -87,3 +87,12 @@ resources:
           notebook_task:
             notebook_path: ../notebooks/06_gold_aggregates.ipynb
 
+    unit_tests:
+      name: youtube_unit_tests
+      max_concurrent_runs: 1
+      tasks: 
+        - task_key: run_pytest
+          timeout_seconds: 1800
+          notebook_task:
+            notebook_path: ../notebooks/run_unit_tests.py
+
