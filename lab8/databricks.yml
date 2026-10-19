@@ -29,3 +29,51 @@ targets:
       silver_schema: natalkamartinuk55_silver
       gold_schema: natalkamartinuk55_gold
       raw_volume_path: /Volumes/dbr_dev_ua5816bd/natalkamartinuk55/raw_data
+
+  prod:
+    mode: production
+    workspace:
+      host: https://adb-7405613488297663.3.azuredatabricks.net
+      root_path: /Workspace/Users/d1a2118a-1d70-44cf-ba58-ea3454da6727/.bundle/${bundle.name}/${bundle.target}
+    run_as:
+      service_principal_name: d1a2118a-1d70-44cf-ba58-ea3454da6727
+    permissions:
+      - user_name: natalkamartinuk55@softserve.academy
+        level: CAN_MANAGE
+      - service_principal_name: d1a2118a-1d70-44cf-ba58-ea3454da6727
+        level: CAN_MANAGE
+    variables:
+      catalog: dbr_dev_ua_5816_trail_3
+      bronze_schema: natalkamartinuk55_youtube_bronze
+      silver_schema: natalkamartinuk55_youtube_silver
+      gold_schema: natalkamartinuk55_youtube_gold
+      raw_volume_path: /Volumes/dbr_dev_ua_5816_trail_3/natalkamartinuk55_youtube_bronze/raw_dat
+    resources:
+      schemas:
+        bronze:
+          name: natalkamartinuk55_youtube_bronze
+          catalog_name: ${var.catalog}
+          grants:
+            - principal: natalkamartinuk55@softserve.academy
+              privileges: [USE_SCHEMA, SELECT, READ_VOLUME]
+        silver:
+          name: natalkamartinuk55_youtube_silver
+          catalog_name: ${var.catalog}
+          grants:
+            - principal: natalkamartinuk55@softserve.academy
+              privileges: [USE_SCHEMA, SELECT]
+        gold:
+          name: natalkamartinuk55_youtube_gold
+          catalog_name: ${var.catalog}
+          grants:
+            - principal: natalkamartinuk55@softserve.academy
+              privileges: [USE_SCHEMA, SELECT]
+      volumes:
+        raw_data:
+          name: raw_data
+          catalog_name: ${var.catalog}
+          schema_name: ${resources.schemas.bronze.name}
+      pipelines:
+        youtube_lakeflow_etl:
+          schema: ${resources.schemas.bronze.name}
+
