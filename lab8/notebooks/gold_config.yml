@@ -1,0 +1,17 @@
+source:
+  videos_bronze: youtube_videos_files_bronze
+  videos_silver: youtube_videos_ldp_silver
+  videos_quarantine: youtube_videos_ldp_quarantine
+trending_period:
+  start: "2017-11-14"
+  end: "2018-06-14"
+reviewer_email: lbiel@softserve.academy
+gold_tables:
+  - dim_category
+  - dim_channel
+  - dim_video
+  - dim_date
+  - fact_video_daily_stats
+  - agg_category_daily
+  - agg_channel_summary
+known_lost_video_ids: ["DQTEST00007"]

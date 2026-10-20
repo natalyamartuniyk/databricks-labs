@@ -1,0 +1,104 @@
+name: Lab 8 CI/CD
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "lab8/**"
+      - ".github/workflows/lab8-cicd.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lab8/**"
+      - ".github/workflows/lab8-cicd.yml"
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: lab8
+
+jobs: 
+  ci:
+    name: Tests in DEV
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    env:
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+    
+      - name: Install Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Validate DEV bundle
+        run: databricks bundle validate -t dev
+
+      - name: Deploy to DEV
+        run: databricks bundle deploy -t dev
+
+      - name: Run unit tests
+        run: databricks bundle run unit_tests -t dev
+
+  
+  validate-prod:
+    name: Validate PROD bundle
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    env:
+      DATABRICKS_HOST: ${{ secrets.PROD_DATABRICKS_HOST }}
+      DATABRICKS_AUTH_TYPE: azure-client-secret
+      ARM_TENANT_ID: ${{ secrets.PROD_ARM_TENANT_ID }}
+      ARM_CLIENT_ID: ${{ secrets.PROD_ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.PROD_ARM_CLIENT_SECRET }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Validate PROD bundle
+        run: databricks bundle validate -t prod
+
+  
+  deploy-prod:
+    name: Deploy to PROD
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    concurrency: prod-deploy
+    env:
+      DATABRICKS_HOST: ${{ secrets.PROD_DATABRICKS_HOST }}
+      DATABRICKS_AUTH_TYPE: azure-client-secret
+      ARM_TENANT_ID: ${{ secrets.PROD_ARM_TENANT_ID }}
+      ARM_CLIENT_ID: ${{ secrets.PROD_ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.PROD_ARM_CLIENT_SECRET }}
+      EVENTHUB_CONNECTION_STRING: ${{ secrets.EVENTHUB_CONNECTION_STRING }}
+      SECRET_SCOPE: natalkamartinuk55_scope
+      SECRET_KEY: natalkamartinuk55-eventhub-conn
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Validate PROD bundle
+        run: databricks bundle validate -t prod
+
+      - name: Sync Event Hub secret
+        run: |
+          if ! databricks secrets list-scopes -o json | grep -q "\"$SECRET_SCOPE\""; then
+            databricks secrets create-scope "$SECRET_SCOPE"
+          fi
+          databricks secrets put-secret "$SECRET_SCOPE" "$SECRET_KEY" --string-value "$EVENTHUB_CONNECTION_STRING"
+
+      - name: Deploy to PROD
+        run: databricks bundle deploy -t prod
+
+      - name: Create gold structure
+        run: databricks bundle run gold_setup -t prod
+
+      - name: Run ETL
+        run: databricks bundle run youtube_etl -t prod
