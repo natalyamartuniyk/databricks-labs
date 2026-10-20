@@ -88,6 +88,7 @@ jobs:
         run: databricks bundle validate -t prod
 
       - name: Sync Event Hub secret
+        working-directory: .
         run: |
           if ! databricks secrets list-scopes -o json | grep -q "\"$SECRET_SCOPE\""; then
             databricks secrets create-scope "$SECRET_SCOPE"
