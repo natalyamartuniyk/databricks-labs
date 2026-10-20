@@ -49,7 +49,7 @@ targets:
       bronze_schema: natalkamartinuk55_youtube_bronze
       silver_schema: natalkamartinuk55_youtube_silver
       gold_schema: natalkamartinuk55_youtube_gold
-      raw_volume_path: /Volumes/dbr_dev_ua_5816_trail_3/natalkamartinuk55_youtube_bronze/raw_dat
+      raw_volume_path: /Volumes/dbr_dev_ua_5816_trail_3/natalkamartinuk55_youtube_bronze/raw_data
     resources:
       schemas:
         bronze:
