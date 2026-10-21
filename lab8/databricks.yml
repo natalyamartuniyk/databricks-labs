@@ -19,6 +19,10 @@ variables:
   raw_source_path:
     description: Volume folder with the original source files (copied to the target raw volume)
     default: /Volumes/dbr_dev_ua5816bd/natalkamartinuk55/raw_data
+  warehouse_id:
+    description: SQL warehouse that runs the dashboard queries
+    lookup:
+      warehouse: "Serverless Starter Warehouse"
 targets:
   dev:
     mode: development

@@ -1,0 +1,9 @@
+resources:
+  dashboards:
+    youtube_trending:
+      display_name: YouTube Trending Analytics
+      file_path: ../dashboards/youtube_trending.lvdash.json
+      warehouse_id: ${var.warehouse_id}
+      dataset_catalog: ${var.catalog}
+      dataset_schema: ${var.gold_schema}
+      embed_credentials: false
