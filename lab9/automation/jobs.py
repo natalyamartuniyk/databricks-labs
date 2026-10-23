@@ -4,6 +4,7 @@ from datetime import timedelta
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.service import jobs
 from databricks.sdk.service.jobs import Run, RunResultState
+from databricks.sdk.errors import DatabricksError
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +57,21 @@ def report_run(w: WorkspaceClient, run: Run) -> bool:
 
     logger.error("Run %s failed: %s", run.run_id, run.state.state_message)
     for task in run.tasks or []:
-        output = w.jobs.get_run_output(run_id=task.run_id)
+        try:
+            output = w.jobs.get_run_output(run_id=task.run_id)
+        except DatabricksError as e:
+            logger.warning("No output for task '%s': %s", task.task_key, e)
+            continue
         if output.error:
             logger.error("Task '%s' failed: %s", task.task_key, output.error)
     return False
+
+def find_job_id(w: WorkspaceClient, name: str) -> int:
+    matches = list(w.jobs.list(name=name))
+    if len(matches) != 1:
+        raise ValueError(f"Expected one job named '{name}', found {len(matches)}")
+    return matches[0].job_id
+
+
+def run_job(w: WorkspaceClient, job_id: int):
+    return w.jobs.run_now(job_id=job_id)
