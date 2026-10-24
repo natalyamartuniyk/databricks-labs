@@ -22,6 +22,12 @@ logger = logging.getLogger("cli")
 
 CONFIG_PATH = Path(__file__).parent / "config.yml"
 
+FINISHED_STATES = {
+    RunLifeCycleState.TERMINATED,
+    RunLifeCycleState.SKIPPED,
+    RunLifeCycleState.INTERNAL_ERROR,
+}
+
 def load_config(target: str) -> dict:
     with open(CONFIG_PATH) as f:
         config = yaml.safe_load(f)
@@ -47,7 +53,6 @@ def cmd_run_job(w: WorkspaceClient, config: dict, args) -> bool:
 def cmd_run_notebook(w: WorkspaceClient, config: dict, args) -> bool:
     cluster_cfg = config["cluster"]
     notebook_cfg = config["notebook"]
-    name = f"{cluster_cfg['name_prefix']}-{datetime.now():%Y%m%d-%H%M%S}"
     name = f"{cluster_cfg['name_prefix']}-{datetime.now():%Y%m%d-%H%M%S}"
 
     waiter = create_cluster(
@@ -81,7 +86,7 @@ def cmd_e2e(w: WorkspaceClient, config: dict, args) -> bool:
 
 def cmd_status(w: WorkspaceClient, config: dict, args) -> bool:
     run = w.jobs.get_run(run_id=args.run_id)
-    if run.state.life_cycle_state != RunLifeCycleState.TERMINATED:
+    if run.state.life_cycle_state not in FINISHED_STATES:
         logger.info("Run %s is %s", run.run_id, run.state.life_cycle_state.value)
         logger.info("Run page: %s", run.run_page_url)
         return True

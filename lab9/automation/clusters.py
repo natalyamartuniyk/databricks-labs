@@ -5,6 +5,11 @@ from databricks.sdk.service import compute
 from databricks.sdk.service.compute import ClusterDetails
 
 from automation.client import whoami
+from databricks.sdk.errors import DatabricksError
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 def create_cluster(
         w: WorkspaceClient,
@@ -32,13 +37,16 @@ def create_cluster(
 
 def wait_until_running(waiter, timeout_minutes: int = 20) -> ClusterDetails:
 
-    def show_state(cluster: ClusterDetails) -> None:
-        print(f"  cluster state: {cluster.state.value}")
+    def log_state(cluster: ClusterDetails) -> None:
+        logger.info("Cluster %s state: %s", cluster.cluster_id, cluster.state.value)
 
     return waiter.result(
         timeout=timedelta(minutes=timeout_minutes),
-        callback=show_state,
+        callback=log_state,
     )
 
 def delete_cluster(w: WorkspaceClient, cluster_id: str) -> None:
-    w.clusters.permanent_delete(cluster_id=cluster_id)  
+    try:
+        w.clusters.permanent_delete(cluster_id=cluster_id)
+    except DatabricksError as e:
+        logger.warning("Could not delete cluster %s: %s", cluster_id, e)
