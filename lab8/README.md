@@ -1,7 +1,5 @@
 # Lab 8 — CI/CD: DEV → PROD promotion
 
-Oct 21, 2026 · @наталя
-
 ## Overview
 
 The whole YouTube project (Lakeflow pipeline, gold notebooks, schemas, dashboard and permissions) is described as one Databricks Asset Bundle and promoted to PROD automatically by GitHub Actions.

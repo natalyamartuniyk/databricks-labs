@@ -1,15 +1,17 @@
-name: Lab 8 CI/CD
+name: Lab 8- 9 CI/CD
 
 on:
   pull_request:
     branches: [main]
     paths:
       - "lab8/**"
+      - "lab9/**"
       - ".github/workflows/lab8-cicd.yml"
   push:
     branches: [main]
     paths:
       - "lab8/**"
+      - "lab9/**"
       - ".github/workflows/lab8-cicd.yml"
   workflow_dispatch:
 
@@ -40,6 +42,25 @@ jobs:
 
       - name: Run unit tests
         run: databricks bundle run unit_tests -t dev
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Lab 9 dependencies
+        working-directory: lab9
+        run: pip install -r requirements.txt
+
+      - name: End-to-end check (Lab 9)
+        working-directory: lab9
+        timeout-minutes: 60
+        run: python cli.py e2e
+
+      - name: Clean up temporary clusters
+        if: always()
+        working-directory: lab9
+        run: python cli.py cleanup
 
   
   validate-prod:

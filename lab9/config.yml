@@ -1,0 +1,17 @@
+dev:
+  cluster:
+    name_prefix: lab9-tmp
+    node_type_id: Standard_D4ds_v5
+    spark_version: 17.3.x-scala2.13
+    policy_id: 00173C9A6978A23D
+
+  notebook:
+    path: /Workspace/Users/natalkamartinuk55@softserve.academy/.bundle/youtube_lakeflow/dev/files/notebooks/05_dq_suite
+    parameters:
+      catalog: dbr_dev_ua5816bd
+      bronze_schema: natalkamartinuk55_bronze
+      silver_schema: natalkamartinuk55_silver
+      gold_schema: natalkamartinuk55_gold
+
+  job_name: "[dev natalkamartinuk55] youtube_etl"
+  pipeline_name: "[dev natalkamartinuk55] youtube_lakeflow_etl"
