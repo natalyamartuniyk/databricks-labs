@@ -88,6 +88,19 @@ def cmd_status(w: WorkspaceClient, config: dict, args) -> bool:
     return report_run(w, run)
 
 
+def cmd_cleanup(w: WorkspaceClient, config: dict, args) -> bool:
+    prefix = config["cluster"]["name_prefix"]
+    me = whoami(w)
+    deleted = 0
+    for cluster in w.clusters.list():
+        if cluster.cluster_name.startswith(prefix) and cluster.creator_user_name == me:
+            delete_cluster(w, cluster.cluster_id)
+            logger.info("Deleted leftover cluster '%s'", cluster.cluster_name)
+            deleted += 1
+    logger.info("Cleanup finished: %s cluster(s) deleted", deleted)
+    return True
+
+
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -111,6 +124,9 @@ def build_parser() -> argparse.ArgumentParser:
     status = commands.add_parser("status", help="show the state of a run")
     status.add_argument("run_id", type=int, help="id of the run")
     status.set_defaults(func=cmd_status)
+    commands.add_parser(
+        "cleanup", help="delete leftover temporary clusters"
+    ).set_defaults(func=cmd_cleanup)
 
     return parser
 
