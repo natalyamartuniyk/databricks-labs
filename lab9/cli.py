@@ -6,6 +6,7 @@ from pathlib import Path
 
 import yaml
 from databricks.sdk import WorkspaceClient
+from databricks.sdk.service.jobs import RunLifeCycleState
 
 from automation.pipelines import (
     find_pipeline_id,
@@ -78,6 +79,14 @@ def cmd_e2e(w: WorkspaceClient, config: dict, args) -> bool:
         return False
     return cmd_run_notebook(w, config, args)
 
+def cmd_status(w: WorkspaceClient, config: dict, args) -> bool:
+    run = w.jobs.get_run(run_id=args.run_id)
+    if run.state.life_cycle_state != RunLifeCycleState.TERMINATED:
+        logger.info("Run %s is %s", run.run_id, run.state.life_cycle_state.value)
+        logger.info("Run page: %s", run.run_page_url)
+        return True
+    return report_run(w, run)
+
 
 
 
@@ -99,6 +108,9 @@ def build_parser() -> argparse.ArgumentParser:
     commands.add_parser(
         "e2e", help="ETL job, then DQ notebook on a temporary cluster"
     ).set_defaults(func=cmd_e2e)
+    status = commands.add_parser("status", help="show the state of a run")
+    status.add_argument("run_id", type=int, help="id of the run")
+    status.set_defaults(func=cmd_status)
 
     return parser
 
