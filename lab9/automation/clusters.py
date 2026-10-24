@@ -5,6 +5,7 @@ from databricks.sdk.service import compute
 from databricks.sdk.service.compute import ClusterDetails
 
 from automation.client import whoami
+from databricks.sdk.errors import DatabricksError
 
 import logging
 
@@ -45,4 +46,7 @@ def wait_until_running(waiter, timeout_minutes: int = 20) -> ClusterDetails:
     )
 
 def delete_cluster(w: WorkspaceClient, cluster_id: str) -> None:
-    w.clusters.permanent_delete(cluster_id=cluster_id)  
+    try:
+        w.clusters.permanent_delete(cluster_id=cluster_id)
+    except DatabricksError as e:
+        logger.warning("Could not delete cluster %s: %s", cluster_id, e)

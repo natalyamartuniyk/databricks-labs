@@ -24,6 +24,7 @@ jobs:
     name: Tests in DEV
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    concurrency: dev-e2e
     env:
       DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
       DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
