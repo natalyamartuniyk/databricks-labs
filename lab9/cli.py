@@ -1,6 +1,7 @@
 import sys
 import argparse
 import logging
+from datetime import datetime
 from pathlib import Path
 
 import yaml
@@ -13,6 +14,8 @@ from automation.pipelines import (
     wait_for_update,
 )
 from automation.client import get_client, whoami
+from automation.jobs import find_job_id, report_run, run_job, submit_notebook, wait_for_run
+from automation.clusters import create_cluster, delete_cluster, wait_until_running
 
 logger = logging.getLogger("cli")
 
@@ -33,6 +36,43 @@ def cmd_run_pipeline(w: WorkspaceClient, config: dict, args) -> bool:
     state = wait_for_update(w, pipeline_id, update_id)
     return report_update(w, pipeline_id, update_id, state)
 
+def cmd_run_job(w: WorkspaceClient, config: dict, args) -> bool:
+    job_id = find_job_id(w, config["job_name"])
+    run_waiter = run_job(w, job_id)
+    logger.info("Started job %s, run %s", job_id, run_waiter.run_id)
+    run = wait_for_run(run_waiter, timeout_minutes=60)
+    return report_run(w, run)
+
+def cmd_run_notebook(w: WorkspaceClient, config: dict, args) -> bool:
+    cluster_cfg = config["cluster"]
+    notebook_cfg = config["notebook"]
+    name = f"{cluster_cfg['name_prefix']}-{datetime.now():%Y%m%d-%H%M%S}"
+    name = f"{cluster_cfg['name_prefix']}-{datetime.now():%Y%m%d-%H%M%S}"
+
+    waiter = create_cluster(
+        w,
+        name=name,
+        node_type_id=cluster_cfg["node_type_id"],
+        spark_version=cluster_cfg["spark_version"],
+        policy_id=cluster_cfg["policy_id"],
+    )
+    cluster_id=waiter.cluster_id
+    logger.info("Creating cluster '%s' (%s)", name, cluster_id)
+
+    try:
+        wait_until_running(waiter)
+        run_waiter = submit_notebook(
+            w, cluster_id, notebook_cfg["path"], notebook_cfg["parameters"]
+        )
+        logger.info("Submitted notebook run %s", run_waiter.run_id)
+        run = wait_for_run(run_waiter)
+        return report_run(w, run)
+    finally:
+        delete_cluster(w, cluster_id)
+        logger.info("Cluster %s deleted", cluster_id)
+
+
+
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Databricks platform automation (Lab 9)")
@@ -43,6 +83,13 @@ def build_parser() -> argparse.ArgumentParser:
     commands.add_parser(
         "run-pipeline", help="trigger the pipeline and wait for it"
     ).set_defaults(func=cmd_run_pipeline)
+    commands.add_parser(
+        "run-job", help="trigger the ETL job and wait for it"
+    ).set_defaults(func=cmd_run_job)
+    commands.add_parser(
+        "run-notebook", help="temporary cluster + DQ notebook + cleanup"
+    ).set_defaults(func=cmd_run_notebook)
+
     return parser
 
 
