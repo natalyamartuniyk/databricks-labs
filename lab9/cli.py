@@ -72,6 +72,13 @@ def cmd_run_notebook(w: WorkspaceClient, config: dict, args) -> bool:
         logger.info("Cluster %s deleted", cluster_id)
 
 
+def cmd_e2e(w: WorkspaceClient, config: dict, args) -> bool:
+    if not cmd_run_job(w, config, args):
+        logger.error("ETL job failed: data quality checks are skipped")
+        return False
+    return cmd_run_notebook(w, config, args)
+
+
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -89,6 +96,9 @@ def build_parser() -> argparse.ArgumentParser:
     commands.add_parser(
         "run-notebook", help="temporary cluster + DQ notebook + cleanup"
     ).set_defaults(func=cmd_run_notebook)
+    commands.add_parser(
+        "e2e", help="ETL job, then DQ notebook on a temporary cluster"
+    ).set_defaults(func=cmd_e2e)
 
     return parser
 
