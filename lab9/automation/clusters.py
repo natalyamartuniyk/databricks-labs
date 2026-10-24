@@ -6,6 +6,10 @@ from databricks.sdk.service.compute import ClusterDetails
 
 from automation.client import whoami
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 def create_cluster(
         w: WorkspaceClient,
         name: str,
@@ -32,12 +36,12 @@ def create_cluster(
 
 def wait_until_running(waiter, timeout_minutes: int = 20) -> ClusterDetails:
 
-    def show_state(cluster: ClusterDetails) -> None:
-        print(f"  cluster state: {cluster.state.value}")
+    def log_state(cluster: ClusterDetails) -> None:
+        logger.info("Cluster %s state: %s", cluster.cluster_id, cluster.state.value)
 
     return waiter.result(
         timeout=timedelta(minutes=timeout_minutes),
-        callback=show_state,
+        callback=log_state,
     )
 
 def delete_cluster(w: WorkspaceClient, cluster_id: str) -> None:
