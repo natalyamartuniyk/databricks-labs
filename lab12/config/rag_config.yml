@@ -1,0 +1,31 @@
+source:
+  silver_table: youtube_videos_ldp_silver
+  category_dim: dim_category
+  trending_date_format: "yy.dd.MM"
+  trending_period:
+    start: "2017-11-14"
+    end: "2018-06-14"
+
+tables:
+  documents: rag_video_documents
+  chunks: rag_video_chunks
+  chunks_staging: rag_video_chunks_staging
+  qa_logs: rag_qa_logs
+
+chunking:
+  chunk_size: 1200
+  chunk_overlap: 150
+
+ai_search:
+  endpoint_name: natalkamartinuk55_rag_endpoint
+  index_name: rag_video_chunks_index
+  embedding_endpoint: databricks-gte-large-en
+  embedding_dimension: 1024
+  embedding_column: embedding
+  pipeline_type: TRIGGERED
+  top_k: 5
+
+llm:
+  model: system.ai.claude-haiku-5-5
+  max_tokens: 500
+  temperature: 0.0
