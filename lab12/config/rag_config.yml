@@ -26,6 +26,7 @@ ai_search:
   top_k: 5
 
 llm:
-  model: system.ai.claude-haiku-5-5
+  base_path: serving-endpoints
+  model: databricks-meta-llama-3-3-70b-instruct
   max_tokens: 500
   temperature: 0.0
