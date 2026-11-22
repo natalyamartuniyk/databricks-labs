@@ -136,6 +136,8 @@ with the minimum it needs:
 Not granted: silver, gold, documents, chunks, staging (the app only reads the index; the job refreshes the data).
 `rag_qa_logs` holds user questions, so it is not shared with readers.
 
+- Metadata filtering: `retrieve(question, filters={"category_name": "Comedy"})` returns only chunks of that category.
+
 
 ## Part B — AI-assisted development
 
