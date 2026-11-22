@@ -1,0 +1,73 @@
+name: Lab 12 CI/CD
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "lab12/**"
+      - ".github/workflows/lab12-cicd.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lab12/**"
+      - ".github/workflows/lab12-cicd.yml"
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: lab12
+
+jobs:
+  tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install pytest
+        run: pip install pytest
+
+      - name: Run unit tests
+        run: pytest -v
+
+  validate:
+    name: Validate bundle (dev)
+    needs: tests
+    runs-on: ubuntu-latest
+    env:
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Validate bundle
+        run: databricks bundle validate -t dev
+
+  deploy:
+    name: Deploy bundle (dev)
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: validate
+    runs-on: ubuntu-latest
+    concurrency: lab12-deploy
+    env:
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Deploy bundle
+        run: databricks bundle deploy -t dev

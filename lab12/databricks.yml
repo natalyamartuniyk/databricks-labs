@@ -1,0 +1,36 @@
+bundle:
+  name: lab12_rag
+
+include:
+  - resources/*.yml
+
+sync:
+  exclude:
+    # Local tooling and tests: not needed in the workspace
+    - .ai-dev-kit/**
+    - .claude/**
+    - .mcp.json
+    - tests/**
+    - .pytest_cache/**
+
+variables:
+  catalog:
+    description: Unity Catalog catalog for all layers
+  silver_schema:
+    description: Schema with the silver videos table
+  gold_schema:
+    description: Schema with the category dimension (dim_category)
+  rag_schema:
+    description: Schema with the RAG tables and the AI Search index
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: https://adb-7405604651938730.10.azuredatabricks.net
+    variables:
+      catalog: dbr_dev_ua5816bd
+      silver_schema: natalkamartinuk55_silver
+      gold_schema: natalkamartinuk55_gold
+      rag_schema: natalkamartinuk55_rag

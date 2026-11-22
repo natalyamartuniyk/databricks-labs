@@ -1,0 +1,66 @@
+questions:
+  - id: A1
+    type: specific
+    question: When is the Santa Ana wind event expected to peak according to NWS San Diego?
+    expected_video_ids: [w4n1XcBdwFk]
+    expected_keywords: [Thursday]
+
+  - id: A2
+    type: specific
+    question: Where did the train swipe a parked vehicle in the ViralHog video?
+    expected_video_ids: [pjuPpVLXDQg]
+    expected_keywords: [Vietnam]
+
+  - id: A3
+    type: specific
+    question: Who is the master woodworker in the Townsends video about early American woodworking?
+    expected_video_ids: [PfZHU8ZT-Uo]
+    expected_keywords: [Maddox]
+
+  - id: A4
+    type: specific
+    question: Which company makes the desktop metal 3D printer shown by 3D Printing Nerd?
+    expected_video_ids: [4FkzLs7cLes]
+    expected_keywords: [Iro3d]
+
+  - id: A5
+    type: specific
+    question: How heavy is the GovSat-1 satellite launched by SpaceX?
+    expected_video_ids: [TfiVD2_Quy4]
+    expected_keywords: ["4200"]
+
+  - id: B1
+    type: general
+    question: "Which actors from Avengers: Infinity War appeared on Jimmy Kimmel Live?"
+    expected_video_ids: [eIp7PYuAu0k, -1Hm41N0dUs]
+    expected_keywords: [Downey]
+
+  - id: B2
+    type: general
+    question: Which concept does the expert explain in 5 levels of difficulty in the WIRED video?
+    expected_video_ids: [hYip_Vuv8J0]
+    expected_keywords: [blockchain]
+
+  - id: B3
+    type: general
+    question: What does CNET say about the size of the Dell XPS 13?
+    expected_video_ids: [fZJ4D2iAx9A]
+    expected_keywords: [smallest]
+
+  - id: C1
+    type: unanswerable
+    question: How many subscribers does the NWS San Diego channel have?
+    expected_video_ids: []
+    expected_keywords: []
+
+  - id: C2
+    type: unanswerable
+    question: Which TikTok videos were trending in 2022?
+    expected_video_ids: []
+    expected_keywords: []
+
+  - id: C3
+    type: unanswerable
+    question: What did Taylor Swift announce about the Eras Tour in 2023?
+    expected_video_ids: []
+    expected_keywords: []
