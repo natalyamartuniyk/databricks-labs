@@ -1,0 +1,43 @@
+resources:
+  jobs:
+    rag_index_refresh:
+      name: rag_index_refresh
+      max_concurrent_runs: 1
+      timeout_seconds: 10800
+      email_notifications:
+        on_failure:
+          - ${workspace.current_user.userName}
+      # Job parameters are passed to every notebook task as widget values.
+      # No schedule or trigger: the job runs only when started manually.
+      parameters:
+        - name: catalog
+          default: ${var.catalog}
+        - name: silver_schema
+          default: ${var.silver_schema}
+        - name: gold_schema
+          default: ${var.gold_schema}
+        - name: rag_schema
+          default: ${var.rag_schema}
+      # No cluster settings: notebook tasks run on serverless compute.
+      tasks:
+        - task_key: prepare_documents
+          timeout_seconds: 3600
+          max_retries: 1
+          notebook_task:
+            notebook_path: ../notebooks/01_prepare_documents.ipynb
+
+        - task_key: chunk_documents
+          timeout_seconds: 3600
+          max_retries: 1
+          depends_on:
+            - task_key: prepare_documents
+          notebook_task:
+            notebook_path: ../notebooks/02_chunk_documents.ipynb
+
+        - task_key: ai_search_index
+          timeout_seconds: 3600
+          max_retries: 1
+          depends_on:
+            - task_key: chunk_documents
+          notebook_task:
+            notebook_path: ../notebooks/03_ai_search_index.ipynb
