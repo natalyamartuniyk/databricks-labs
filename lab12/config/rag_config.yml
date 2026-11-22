@@ -11,6 +11,7 @@ tables:
   chunks: rag_video_chunks
   chunks_staging: rag_video_chunks_staging
   qa_logs: rag_qa_logs
+  eval_results: rag_eval_results
 
 chunking:
   chunk_size: 1200
